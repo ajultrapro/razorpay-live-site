@@ -5,19 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Razorpay Payment Link Generator</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; margin: 0; padding: 20px; box-sizing: border-box;}
-        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; margin: 0; padding: 20px; box-sizing: border-box; }
+        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin-bottom: 30px; }
         h2 { margin-top: 0; color: #333; }
         .form-group { margin-bottom: 20px; text-align: left; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
         input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 14px; background-color: #528FF0; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
         button:disabled { background-color: #a0cfff; cursor: not-allowed; }
-        button:hover:not(:disabled) { background-color: #3578E5; }
-        #popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .popup-content { background: #fff; padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .popup-content a { color: #007bff; text-decoration: none; font-weight: bold; word-break: break-all; }
-        #close-popup { margin-top: 20px; padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        
+        /* --- History Styles --- */
+        .history-container { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 900px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        #refresh-btn { padding: 10px 15px; background-color: #28a745; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { font-weight: 600; }
+        .status { padding: 4px 8px; border-radius: 12px; color: white; font-size: 12px; text-transform: capitalize; }
+        .status-paid { background-color: #28a745; }
+        .status-created { background-color: #ffc107; color: #333; }
+        .status-expired { background-color: #6c757d; }
     </style>
 </head>
 <body>
@@ -25,29 +35,28 @@
     <div class="container">
         <h2>Generate Payment Link</h2>
         <form id="payment-form">
-            <div class="form-group">
-                <label for="phone">Phone Number (10 digits)</label>
-                <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}">
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount (in ₹)</label>
-                <input type="number" id="amount" name="amount" required min="1">
-            </div>
-             <div class="form-group">
-                <label for="description">Payment For</label>
-                <input type="text" id="description" name="description" required placeholder="e.g., Service Fee">
-            </div>
+            <div class="form-group"><label for="phone">Phone Number (10 digits)</label><input type="tel" id="phone" required pattern="[0-9]{10}"></div>
+            <div class="form-group"><label for="amount">Amount (in ₹)</label><input type="number" id="amount" required min="1"></div>
+            <div class="form-group"><label for="description">Payment For</label><input type="text" id="description" required placeholder="e.g., Service Fee"></div>
             <button type="submit" id="submit-btn">Generate & Send Link</button>
         </form>
     </div>
 
-    <div id="popup" class="popup">
-        <div class="popup-content">
-            <h3>✅ Link Generated!</h3>
-            <p>The link has also been sent via SMS.</p>
-            <p><strong>Link:</strong> <a href="#" id="payment-link" target="_blank"></a></p>
-            <button id="close-popup">Close</button>
+    <div id="popup" class="popup"><div class="popup-content"><h3>✅ Link Generated!</h3><p><strong>Link:</strong> <a href="#" id="payment-link" target="_blank"></a></p><button id="close-popup">Close</button></div></div>
+
+    <div class="history-container">
+        <div class="history-header">
+            <h2>Payment History</h2>
+            <button id="refresh-btn">Refresh</button>
         </div>
+        <p id="loading-text">Loading history...</p>
+        <table id="history-table" style="display:none;">
+            <thead>
+                <tr><th>Date</th><th>Description</th><th>Amount</th><th>Phone</th><th>Status</th><th>Link</th></tr>
+            </thead>
+            <tbody id="history-body">
+                </tbody>
+        </table>
     </div>
 
     <script>
@@ -56,7 +65,55 @@
         const popup = document.getElementById('popup');
         const paymentLinkEl = document.getElementById('payment-link');
         const closePopupBtn = document.getElementById('close-popup');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const historyTable = document.getElementById('history-table');
+        const historyBody = document.getElementById('history-body');
+        const loadingText = document.getElementById('loading-text');
 
+        // --- Function to fetch and display history ---
+        const fetchHistory = async () => {
+            loadingText.textContent = "Loading history...";
+            historyTable.style.display = 'none';
+            
+            try {
+                const response = await fetch('/.netlify/functions/get-history');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+
+                historyBody.innerHTML = ''; // Clear existing rows
+                if (data.length === 0) {
+                    loadingText.textContent = "No history found.";
+                    return;
+                }
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    const statusClass = `status-${item.Status || 'created'}`.toLowerCase();
+                    const formattedDate = new Date(item.Timestamp).toLocaleString();
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${item.Description}</td>
+                        <td>₹${item.Amount}</td>
+                        <td>${item.Phone}</td>
+                        <td><span class="status ${statusClass}">${item.Status}</span></td>
+                        <td><a href="${item.Link}" target="_blank">View</a></td>
+                    `;
+                    historyBody.appendChild(row);
+                });
+                
+                loadingText.textContent = "";
+                historyTable.style.display = 'table';
+
+            } catch (error) {
+                loadingText.textContent = `Error loading history: ${error.message}`;
+            }
+        };
+        
+        // Form submission logic (same as before)
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             submitBtn.disabled = true;
@@ -65,35 +122,33 @@
             const phone = document.getElementById('phone').value;
             const amount = document.getElementById('amount').value;
             const description = document.getElementById('description').value;
-
+            
             try {
-                // This securely calls our backend function
                 const response = await fetch('/.netlify/functions/create-payment-link', {
                     method: 'POST',
                     body: JSON.stringify({ phone, amount, description }),
                 });
-                
                 const data = await response.json();
-
-                if (response.ok) {
-                    paymentLinkEl.href = data.short_url;
-                    paymentLinkEl.textContent = data.short_url;
-                    popup.style.display = 'flex';
-                } else {
-                    alert(`Error: ${data.error}`);
-                }
+                if (!response.ok) throw new Error(data.error);
+                
+                paymentLinkEl.href = data.short_url;
+                paymentLinkEl.textContent = data.short_url;
+                popup.style.display = 'flex';
+                fetchHistory(); // Refresh history after creating a new link
             } catch (error) {
-                console.error('Fetch Error:', error);
-                alert('A network error occurred. Please try again.');
+                alert(`Error: ${error.message}`);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Generate & Send Link';
             }
         });
 
-        closePopupBtn.addEventListener('click', () => {
-            popup.style.display = 'none';
-        });
+        // Event Listeners
+        refreshBtn.addEventListener('click', fetchHistory);
+        closePopupBtn.addEventListener('click', () => { popup.style.display = 'none'; });
+
+        // Initial load of history
+        document.addEventListener('DOMContentLoaded', fetchHistory);
     </script>
 </body>
 </html>
