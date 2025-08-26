@@ -150,7 +150,6 @@
         // Initial load of history
         document.addEventListener('DOMContentLoaded', fetchHistory);
     </script>
-    // Find this line in your <script> at the bottom of index.html
 const response = await fetch('/.netlify/functions/create-payment-link', {
     method: 'POST',
     // ADD THESE THREE LINES
@@ -169,6 +168,7 @@ const response = await fetch('/.netlify/functions/get-history', {
 });
 </body>
 </html>
+
 
 
 
