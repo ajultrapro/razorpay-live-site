@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body { font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; margin: 0; }
+        .login-container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 320px; }
+        h2 { margin-top: 0; }
+        input { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 14px; margin-top: 20px; background-color: #528FF0; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+        .error { color: #dc3545; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Enter Password</h2>
+        <form id="login-form">
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <p id="error-msg" class="error">Incorrect password.</p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+
+            // For simplicity, we just check if a password was entered
+            // The real check happens on the server.
+            if (password) {
+                // Store the password in session storage so other pages can use it
+                sessionStorage.setItem('auth-token', password);
+                // Redirect to the main application page
+                window.location.href = '/index.html';
+            }
+        });
+    </script>
+</body>
+</html>
