@@ -150,25 +150,5 @@
         // Initial load of history
         document.addEventListener('DOMContentLoaded', fetchHistory);
     </script>
-const response = await fetch('/.netlify/functions/create-payment-link', {
-    method: 'POST',
-    // ADD THESE THREE LINES
-    headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem('auth-token')}`
-    },
-    body: JSON.stringify({ phone, amount, description }),
-});
-
-// And find this line in the fetchHistory function
-const response = await fetch('/.netlify/functions/get-history', {
-    // ADD THESE THREE LINES
-    headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem('auth-token')}`
-    }
-});
 </body>
 </html>
-
-
-
-
