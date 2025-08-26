@@ -1,17 +1,3 @@
-// ADD THIS BLOCK AT THE VERY TOP OF BOTH .js FUNCTION FILES
-
-exports.handler = async (event) => {
-    const submittedPassword = (event.headers.authorization || '').replace('Bearer ', '');
-    const correctPassword = process.env.PAGE_PASSWORD;
-
-    if (!submittedPassword || submittedPassword !== correctPassword) {
-        return {
-            statusCode: 401, // Unauthorized
-            body: JSON.stringify({ error: 'Unauthorized' }),
-        };
-    }
-
-    // ... your existing function code continues below ...
 const Razorpay = require('razorpay');
 const { google } = require('googleapis');
 
@@ -92,4 +78,5 @@ exports.handler = async (event) => {
         };
     }
 };
+
 
