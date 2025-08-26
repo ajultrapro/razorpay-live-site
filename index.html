@@ -4,59 +4,499 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Razorpay Payment Link Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f0f2f5; margin: 0; padding: 20px; box-sizing: border-box; }
-        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin-bottom: 30px; }
-        h2 { margin-top: 0; color: #333; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; background-color: #528FF0; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
-        button:disabled { background-color: #a0cfff; cursor: not-allowed; }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .popup-content { background: #fff; padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .popup-content a { color: #007bff; text-decoration: none; font-weight: bold; word-break: break-all; }
-        
+        :root {
+            --primary: #528FF0;
+            --primary-dark: #3b6dc2;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --border-radius: 12px;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+            color: var(--gray-800);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            margin-bottom: 30px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(to right, #f9fafb, #fff);
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header h2 i {
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+        }
+
+        .input-with-icon input {
+            padding-left: 45px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: var(--gray-100);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(82, 143, 240, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(82, 143, 240, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- Popup Styles --- */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--success);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .popup-content p {
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .popup-content a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: var(--gray-100);
+            transition: var(--transition);
+        }
+
+        .popup-content a:hover {
+            background-color: var(--gray-200);
+        }
+
+        #close-popup {
+            margin-top: 20px;
+            background: var(--gray-300);
+            color: var(--gray-800);
+            width: auto;
+            padding: 12px 25px;
+        }
+
+        #close-popup:hover {
+            background: var(--gray-400);
+            box-shadow: none;
+            transform: none;
+        }
+
         /* --- History Styles --- */
-        .history-container { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 900px; }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        #refresh-btn { padding: 10px 15px; background-color: #28a745; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
-        th { font-weight: 600; }
-        .status { padding: 4px 8px; border-radius: 12px; color: white; font-size: 12px; text-transform: capitalize; }
-        .status-paid { background-color: #28a745; }
-        .status-created { background-color: #ffc107; color: #333; }
-        .status-expired { background-color: #6c757d; }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        #refresh-btn {
+            width: auto;
+            padding: 12px 20px;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        #refresh-btn:hover {
+            background: var(--gray-200);
+            box-shadow: none;
+            transform: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: var(--gray-100);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-300);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: var(--transition);
+        }
+
+        tr:hover {
+            background-color: var(--gray-100);
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+            display: inline-block;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .status-paid {
+            background-color: var(--success);
+        }
+
+        .status-created {
+            background-color: var(--warning);
+            color: var(--gray-800);
+        }
+
+        .status-expired {
+            background-color: var(--secondary);
+        }
+
+        .action-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .action-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        #loading-text {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-600);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--gray-400);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            #refresh-btn {
+                align-self: flex-end;
+            }
+            
+            .card {
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Generate Payment Link</h2>
-        <form id="payment-form">
-            <div class="form-group"><label for="phone">Phone Number (10 digits)</label><input type="tel" id="phone" required pattern="[0-9]{10}"></div>
-            <div class="form-group"><label for="amount">Amount (in ₹)</label><input type="number" id="amount" required min="1"></div>
-            <div class="form-group"><label for="description">Payment For</label><input type="text" id="description" required placeholder="e.g., Service Fee"></div>
-            <button type="submit" id="submit-btn">Generate & Send Link</button>
-        </form>
-    </div>
-
-    <div id="popup" class="popup"><div class="popup-content"><h3>✅ Link Generated!</h3><p><strong>Link:</strong> <a href="#" id="payment-link" target="_blank"></a></p><button id="close-popup">Close</button></div></div>
-
-    <div class="history-container">
-        <div class="history-header">
-            <h2>Payment History</h2>
-            <button id="refresh-btn">Refresh</button>
+    <div class="app-container">
+        <div class="header">
+            <h1>Razorpay Payment Link Generator</h1>
+            <p>Create and manage payment links effortlessly</p>
         </div>
-        <p id="loading-text">Loading history...</p>
-        <table id="history-table" style="display:none;">
-            <thead>
-                <tr><th>Date</th><th>Description</th><th>Amount</th><th>Phone</th><th>Status</th><th>Link</th></tr>
-            </thead>
-            <tbody id="history-body">
-                </tbody>
-        </table>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-link"></i> Generate Payment Link</h2>
+            </div>
+            <div class="card-body">
+                <form id="payment-form">
+                    <div class="form-group">
+                        <label for="phone"><i class="fas fa-mobile-alt"></i> Phone Number</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="phone" required pattern="[0-9]{10}" placeholder="Enter 10-digit phone number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount"><i class="fas fa-indian-rupee-sign"></i> Amount</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <input type="number" id="amount" required min="1" placeholder="Enter amount in ₹">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description"><i class="fas fa-tag"></i> Payment For</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-pen"></i>
+                            <input type="text" id="description" required placeholder="e.g., Service Fee, Product Purchase">
+                        </div>
+                    </div>
+                    <button type="submit" id="submit-btn">
+                        <i class="fas fa-bolt"></i> Generate & Send Link
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <h3><i class="fas fa-check-circle"></i> Link Generated!</h3>
+                <p><strong>Payment link has been created successfully:</strong></p>
+                <a href="#" id="payment-link" target="_blank"></a>
+                <button id="close-popup">Close</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> Payment History</h2>
+            </div>
+            <div class="card-body">
+                <div class="history-header">
+                    <p>View and manage all your generated payment links</p>
+                    <button id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <p id="loading-text">Loading payment history...</p>
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <i class="fas fa-receipt"></i>
+                    <h3>No payment history yet</h3>
+                    <p>Generate your first payment link to get started</p>
+                </div>
+                <table id="history-table" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -69,10 +509,12 @@
         const historyTable = document.getElementById('history-table');
         const historyBody = document.getElementById('history-body');
         const loadingText = document.getElementById('loading-text');
+        const emptyState = document.getElementById('empty-state');
 
         // --- Function to fetch and display history ---
         const fetchHistory = async () => {
-            loadingText.textContent = "Loading history...";
+            loadingText.style.display = 'block';
+            emptyState.style.display = 'none';
             historyTable.style.display = 'none';
             
             try {
@@ -85,7 +527,8 @@
 
                 historyBody.innerHTML = ''; // Clear existing rows
                 if (data.length === 0) {
-                    loadingText.textContent = "No history found.";
+                    loadingText.style.display = 'none';
+                    emptyState.style.display = 'block';
                     return;
                 }
 
@@ -100,12 +543,12 @@
                         <td>₹${item.Amount}</td>
                         <td>${item.Phone}</td>
                         <td><span class="status ${statusClass}">${item.Status}</span></td>
-                        <td><a href="${item.Link}" target="_blank">View</a></td>
+                        <td><a href="${item.Link}" class="action-link" target="_blank"><i class="fas fa-external-link-alt"></i> View</a></td>
                     `;
                     historyBody.appendChild(row);
                 });
                 
-                loadingText.textContent = "";
+                loadingText.style.display = 'none';
                 historyTable.style.display = 'table';
 
             } catch (error) {
@@ -113,11 +556,11 @@
             }
         };
         
-        // Form submission logic (same as before)
+        // Form submission logic
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Generating...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
 
             const phone = document.getElementById('phone').value;
             const amount = document.getElementById('amount').value;
@@ -139,7 +582,7 @@
                 alert(`Error: ${error.message}`);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Generate & Send Link';
+                submitBtn.innerHTML = '<i class="fas fa-bolt"></i> Generate & Send Link';
             }
         });
 
